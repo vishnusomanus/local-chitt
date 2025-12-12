@@ -15,10 +15,9 @@ const seedMembers = [
   { name: "Dyan", email: "dyan@example.com" },
   { name: "Renju", email: "renju@example.com" },
   { name: "Nandhu", email: "nandhu@example.com" },
-  { name: "Abhilash", email: "abilash@example.com" }
+  { name: "Abhilash", email: "abilash@example.com" },
+  { name: "PV", email: "PV@example.com" }
 ];
-
-const payoutOrder = ["Abhilash", "Sumesh", "Vishnu", "Dyan"];
 
 async function main() {
   await prisma.auditLog.deleteMany();
@@ -105,11 +104,8 @@ async function main() {
     )
   ]);
 
-  const abhilashId = users.find((u) => u.name === "Abhilash")?.id;
-  const sumeshId = users.find((u) => u.name === "Sumesh")?.id;
   const vishnuId = users.find((u) => u.name === "Vishnu")?.id;
-  const dyanId = users.find((u) => u.name === "Dyan")?.id;
-  const payoutSequence = [abhilashId, sumeshId, vishnuId, dyanId].filter(Boolean);
+  const abhilashId = users.find((u) => u.name === "Abhilash")?.id;
 
   const start = new Date("2025-09-01");
   const months: { id: number; index: number; name: string }[] = [];
@@ -125,8 +121,7 @@ async function main() {
         startDate,
         dueDate,
         target: 50000,
-        chittyId: chitty.id,
-        lotReceiverId: payoutSequence[i % payoutSequence.length] || null
+        chittyId: chitty.id
       }
     });
     months.push({ id: month.id, index: month.index, name: month.name });

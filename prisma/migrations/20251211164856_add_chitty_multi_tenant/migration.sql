@@ -18,14 +18,6 @@ INSERT OR IGNORE INTO "Chitty" ("id", "name", "createdAt", "updatedAt") VALUES (
 -- Since SQLite doesn't support this directly, we'll use a workaround
 -- We'll just proceed and handle errors in the redefinition step
 
--- Set all existing records to default chitty (id = 1) if chittyId is NULL
-UPDATE "User" SET "chittyId" = 1 WHERE "chittyId" IS NULL;
-UPDATE "Month" SET "chittyId" = 1 WHERE "chittyId" IS NULL;
-UPDATE "Payment" SET "chittyId" = 1 WHERE "chittyId" IS NULL;
-UPDATE "Payout" SET "chittyId" = 1 WHERE "chittyId" IS NULL;
-UPDATE "Setting" SET "chittyId" = 1 WHERE "chittyId" IS NULL;
-UPDATE "AuditLog" SET "chittyId" = 1 WHERE "chittyId" IS NULL;
-
 -- Now make columns required and add foreign keys
 PRAGMA defer_foreign_keys=ON;
 PRAGMA foreign_keys=OFF;
