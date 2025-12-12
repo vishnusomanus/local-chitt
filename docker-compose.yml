@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  web:
+    build: .
+    command: npm run start
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=file:/app/prisma/dev.db
+      - JWT_SECRET=change-me
+    volumes:
+      - sqlite-data:/app/prisma
+    depends_on: []
+volumes:
+  sqlite-data:
+

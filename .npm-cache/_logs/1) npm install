@@ -1,0 +1,7 @@
+1) npm install
+2) Copy env.example → .env.local (set JWT_SECRET), ensure DATABASE_URL points to SQLite.
+3) npm run prisma:migrate -- --name init
+4) npm run prisma:seed
+5) npm run dev (or docker compose up --build)
+Default admin login: vishnu@example.com / password123.
+Tests: npm test (not run here).

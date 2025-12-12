@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Chitty {
+  id        Int        @id @default(autoincrement())
+  name      String?
+  users     User[]
+  months    Month[]
+  payments  Payment[]
+  payouts   Payout[]
+  settings  Setting[]
+  auditLogs AuditLog[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model User {
+  id                Int        @id @default(autoincrement())
+  name              String
+  email             String
+  phone             String?
+  role              String     @default("MEMBER")
+  password          String
+  chittyId          Int
+  chitty            Chitty     @relation(fields: [chittyId], references: [id])
+  parentAdminId     Int?
+  parentAdmin       User?      @relation("MemberAdmin", fields: [parentAdminId], references: [id])
+  members           User[]     @relation("MemberAdmin")
+  adminSettings     Setting?   @relation("AdminSettings")
+  payments          Payment[]
+  payouts           Payout[]   @relation("PayoutReceiver")
+  lotReceiverMonths Month[]    @relation("MonthLotReceiver")
+  auditLogs         AuditLog[]
+  createdAt         DateTime   @default(now())
+  deletedAt         DateTime?
+
+  @@unique([email, chittyId])
+  @@index([chittyId])
+  @@index([parentAdminId])
+}
+
+model Month {
+  id            Int       @id @default(autoincrement())
+  index         Int
+  name          String
+  startDate     DateTime
+  dueDate       DateTime
+  target        Int
+  lotReceiverId Int?
+  lotReceiver   User?     @relation("MonthLotReceiver", fields: [lotReceiverId], references: [id])
+  chittyId      Int
+  chitty        Chitty    @relation(fields: [chittyId], references: [id])
+  isClosed      Boolean   @default(false)
+  payments      Payment[]
+  payout        Payout?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([chittyId])
+}
+
+model Payment {
+  id         Int      @id @default(autoincrement())
+  memberId   Int
+  member     User     @relation(fields: [memberId], references: [id])
+  monthId    Int
+  month      Month    @relation(fields: [monthId], references: [id])
+  chittyId   Int
+  chitty     Chitty   @relation(fields: [chittyId], references: [id])
+  monthIndex Int
+  amount     Int
+  method     String
+  note       String?
+  date       DateTime @default(now())
+  refunded   Boolean  @default(false)
+  corrected  Boolean  @default(false)
+  isDeleted  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([chittyId])
+}
+
+model Payout {
+  id         Int      @id @default(autoincrement())
+  monthId    Int      @unique
+  month      Month    @relation(fields: [monthId], references: [id])
+  receiverId Int
+  receiver   User     @relation("PayoutReceiver", fields: [receiverId], references: [id])
+  chittyId   Int
+  chitty     Chitty   @relation(fields: [chittyId], references: [id])
+  amount     Int
+  date       DateTime @default(now())
+  note       String?
+  createdAt  DateTime @default(now())
+
+  @@index([chittyId])
+}
+
+model Setting {
+  id                  Int      @id @default(autoincrement())
+  chittyId            Int
+  chitty              Chitty   @relation(fields: [chittyId], references: [id])
+  adminId             Int?     @unique
+  admin               User?    @relation("AdminSettings", fields: [adminId], references: [id])
+  monthlyAmount       Int      @default(5000)
+  monthsCount         Int      @default(11)
+  startDate           DateTime
+  endDate             DateTime?
+  dueDay              Int      @default(10)
+  allowOverCollection Boolean  @default(false)
+  maxMembers          Int?     // Auto-calculated: monthsCount - 1
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([chittyId])
+  @@index([adminId])
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  entityType String
+  entityId   Int
+  action     String
+  data       String?
+  actorId    Int?
+  actor      User?    @relation(fields: [actorId], references: [id])
+  chittyId   Int
+  chitty     Chitty   @relation(fields: [chittyId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@index([chittyId])
+}
